@@ -1,4 +1,4 @@
-import { Button, Input, SearchBar, Progress } from "@/components/ui";
+import { Button, SearchBar, Progress, LabelDatePicker } from "@/components/ui";
 import styles from "./page.module.scss";
 
 function BoardPage() {
@@ -28,16 +28,25 @@ function BoardPage() {
             </aside>
             <main className="page__main">
                 <div className={styles.header}>
-                    <div className={styles.heaer__top}>
+                    <div className={styles.header__top}>
                         {/* 제목 입력 Input 섹션 */}
-                        <Input placeholder="Enter Title Here!" />
+                        <input type="text" placeholder="Enter Title Here!" className={styles.header__top__input} />
                         {/* 진행상황 척도 그래프 섹션 */}
                         <div className="flex items-center justify-start gap-4">
                             <small className="text-sm font-medium leading-none text-[#6D6D6D]">1/10 Completed</small>
                             <Progress className="w-60 h-[10px]" />
                         </div>
                     </div>
-                    <div>{/* 캘린더 + Add New Board 버튼 섹션 */}</div>
+                    {/* 캘린더 + Add New Board 버튼 섹션 */}
+                    <div className={styles.header__bottom}>
+                        <div className="flex items-center gap-5">
+                            <LabelDatePicker label={"From"} />
+                            <LabelDatePicker label={"To"} />
+                        </div>
+                        <Button className="text-white bg-[#E79057] hover:bg-[#E79057] hover:border hover:border-[#E26F24]">
+                            Add New Board
+                        </Button>
+                    </div>
                 </div>
                 <div className={styles.body}></div>
             </main>
