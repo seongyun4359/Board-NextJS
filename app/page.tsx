@@ -2,14 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Button, SearchBar } from "@/components/ui";
 import { useToast } from "@/hooks/use-toast";
+import { Button, SearchBar } from "@/shared/ui";
 
 function InitPage() {
     const router = useRouter();
     const { toast } = useToast();
 
-    const createPage = async () => {
+    const handleCreatePage = async () => {
         /** Supabase의 todo-list 테이블에 ROW 데이터 생성 */
         /** asyn-await 구문이니까 에러핸들링을 추후 try-catch-finally를 사용하자. */
         const { data, status, error } = await supabase
@@ -45,13 +45,13 @@ function InitPage() {
                 {/* Add New Page 버튼 UI */}
                 <Button
                     className="text-[#E79057] bg-white border border-[#E79057] hover:bg-[#FFF9F5]"
-                    onClick={createPage}
+                    onClick={handleCreatePage}
                 >
                     Add New Page
                 </Button>
                 {/* TODO 목록 UI 하나 */}
                 <div className="flex flex-col mt-4 gap-2">
-                    <small className="text-sm font-medium leading-none text-[#A6A6A6]">SeongYun의 TODO-BOARD</small>
+                    <small className="text-sm font-medium leading-none text-[#A6A6A6]">9Diin의 TODO-BOARD</small>
                     <ul className="flex flex-col">
                         <li className="flex items-center gap-2 py-2 px-[10px] bg-[#F5F5F5] rounded-sm text-sm">
                             <div className="h-[6px] w-[6px] rounded-full bg-[#00F38D]"></div>
@@ -75,7 +75,7 @@ function InitPage() {
                     </div>
                     <Button
                         className="text-[#E79057] bg-transparent border border-[#E79057] hover:bg-[#FFF9F5] w-[180px]"
-                        onClick={() => router.push("/board/1")}
+                        onClick={handleCreatePage}
                     >
                         Add New Page
                     </Button>

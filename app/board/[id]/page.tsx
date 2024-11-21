@@ -1,36 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { nanoid } from "nanoid";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 /** FSD 컴포넌트 */
-import { CardBoard } from "@/features";
-import { Button, SearchBar, Progress, LabelDatePicker } from "@/components/ui";
+import { AlertPopup, CardBoard } from "@/features";
+import { Button, SearchBar, Progress, LabelDatePicker } from "@/shared/ui";
 import { ChevronLeft } from "lucide-react";
 /** 스타일 */
 import styles from "./page.module.scss";
-
-interface Task {
-    id: number;
-    title: string;
-    startDate: string | Date;
-    endDate: string | Date;
-    boards: BoardContent[];
-}
-interface BoardContent {
-    boardId: string | number;
-    isCompleted: boolean;
-    title: string;
-    startDate: Date | string;
-    endDate: Date | string;
-    content: string;
-}
+/** 타입 */
+import { Task, BoardContent } from "@/types";
 
 function BoardPage() {
-    const pathname = usePathname();
+    const { id } = useParams();
     const { toast } = useToast();
     /** Supabase 'todos' 테이블에서 사용될 각 ROW 데이터 COLUMN */
     const [title, setTitle] = useState<string>(""); // 필수 값 처리 예정
@@ -38,27 +24,42 @@ function BoardPage() {
     const [endDate, setEndDate] = useState<Date>(new Date()); // 필수 값 처리 예정
     const [task, setTask] = useState<Task | null>(null); // 필수 값으로 처리할 지 안할 지 추후 고민
 
-    /** 저장 버튼 클릭 시 */
-    const onSave = async () => {
-        const { status } = await supabase
-            .from("todos")
-            .update({ title: title })
-            .eq("id", Number(pathname.split("/")[2]));
+    const [test, setTest] = useState<Task[]>([]);
 
-        if (status === 204) {
+    /** 저장 버튼 클릭 시 */
+    const handleSave = async () => {
+        if (!title || !startDate || !endDate) {
             toast({
-                title: "TODO-LIST 수정을 완료하였습니다.",
+                variant: "destructive",
+                title: "기입되지 않은 데이터(값)가 있습니다.",
                 description: "수정한 TODO-LIST의 마감일을 꼭 지켜주세요!",
             });
-            getData(); // 데이터 갱신
+            return;
+        }
+        try {
+            const { status } = await supabase
+                .from("todos")
+                .update({
+                    title: title,
+                    start_date: startDate,
+                    end_date: endDate,
+                })
+                .eq("id", Number(id));
+
+            if (status === 204) {
+                toast({
+                    title: "TODO-LIST 수정을 완료하였습니다.",
+                    description: "수정한 TODO-LIST의 마감일을 꼭 지켜주세요!",
+                });
+                getData(); // 데이터 갱신
+            }
+        } catch (error) {
+            console.error(error);
         }
     };
 
-    /** 전체 삭제 버튼 클릭 시 */
-    const onDeleteAll = () => {};
-
     /** Add New Board 버튼을 클릭 시 */
-    const createBoard = () => {
+    const handleCreateBoard = () => {
         let newBoards: BoardContent[] = [];
         const boardContent = {
             boardId: nanoid(),
@@ -82,46 +83,52 @@ function BoardPage() {
     };
 
     const updateBoards = async (newBoards: BoardContent[]) => {
-        console.log(newBoards);
-        const { status, error } = await supabase
-            .from("todos")
-            .update({ boards: newBoards })
-            .eq("id", Number(pathname.split("/")[2]));
+        try {
+            const { status, error } = await supabase.from("todos").update({ boards: newBoards }).eq("id", Number(id));
 
-        if (status === 204) {
-            toast({
-                title: "새로운 TODO-BOARD가 생성되었습니다.",
-                description: "생성한 TODO-BOARD를 예쁘게 꾸며주세요.",
-            });
-            getData(); // 데이터 갱신
-        }
+            if (status === 204) {
+                toast({
+                    title: "새로운 TODO-BOARD가 생성되었습니다.",
+                    description: "생성한 TODO-BOARD를 예쁘게 꾸며주세요.",
+                });
+                getData(); // 데이터 갱신
+            }
 
-        if (error) {
-            console.error(error);
-            toast({
-                variant: "destructive",
-                title: "에러가 발생했습니다.",
-                description: "개발자 도구창을 확인하세요.",
-            });
+            if (error) {
+                console.error(error);
+                toast({
+                    variant: "destructive",
+                    title: "에러가 발생했습니다.",
+                    description: "개발자 도구창을 확인하세요.",
+                });
+            }
+        } catch (error) {
+            console.log(error);
         }
     };
 
-    /** Supabase 데이터베이스의(기존에 생성한 페이지에) 데이터 유무 체크*/
+    /** Supabase 데이터베이스의(기존에 생성한 페이지에) 데이터 유무 체크 */
     const getData = async () => {
-        const { data } = await supabase.from("todos").select("*"); // 전체 조회
+        const { data } = await supabase.from("todos").select("*").eq("id", id);
 
         if (data !== null) {
-            data.forEach((task: Task) => {
-                if (task.id === Number(pathname.split("/")[2])) {
-                    setTask(task);
-                    setTitle(task.title);
-                }
-            });
+            setTask(data[0]);
+            setTitle(data[0].title);
+            setStartDate(data[0].start_date);
+            setEndDate(data[0].end_date);
+        }
+    };
+
+    const fnTest = async () => {
+        const { data } = await supabase.from("todos").select("*");
+        if (data !== null) {
+            setTest(data);
         }
     };
 
     useEffect(() => {
         getData();
+        fnTest();
     }, []);
 
     return (
@@ -135,16 +142,16 @@ function BoardPage() {
                 </Button>
                 {/* TODO 목록 UI 하나 */}
                 <div className="flex flex-col mt-4 gap-2">
-                    <small className="text-sm font-medium leading-none text-[#A6A6A6]">SeongYun의 TODO-LIST</small>
+                    <small className="text-sm font-medium leading-none text-[#A6A6A6]">9Diin의 TODO-LIST</small>
                     <ul className="flex flex-col">
-                        <li className="flex items-center gap-2 py-2 px-[10px] bg-[#F5F5F5] rounded-sm text-sm">
-                            <div className="h-[6px] w-[6px] rounded-full bg-[#00F38D]"></div>
-                            Enter Title
-                        </li>
-                        <li className="flex items-center gap-2 py-2 px-[10px] bg-[#F5F5F5] rounded-sm text-sm">
-                            <div className="h-[6px] w-[6px] rounded-full bg-[#00F38D]"></div>
-                            Enter Title
-                        </li>
+                        {test.map((item: Task) => {
+                            return (
+                                <li className="flex items-center gap-2 py-2 px-[10px] bg-[#F5F5F5] rounded-sm text-sm">
+                                    <div className="h-[6px] w-[6px] rounded-full bg-[#00F38D]"></div>
+                                    {item.title}
+                                </li>
+                            );
+                        })}
                     </ul>
                 </div>
             </aside>
@@ -155,12 +162,12 @@ function BoardPage() {
                             <ChevronLeft />
                         </Button>
                         <div className="flex items-center gap-2">
-                            <Button variant={"secondary"} onClick={onSave}>
+                            <Button variant={"secondary"} onClick={handleSave}>
                                 저장
                             </Button>
-                            <Button className="text-rose-600 bg-red-50 hover:bg-rose-50" onClick={onDeleteAll}>
-                                삭제
-                            </Button>
+                            <AlertPopup>
+                                <Button className="text-rose-600 bg-red-50 hover:bg-rose-50">삭제</Button>
+                            </AlertPopup>
                         </div>
                     </div>
                     <div className={styles.header__top}>
@@ -181,12 +188,12 @@ function BoardPage() {
                     {/* 캘린더 + Add New Board 버튼 섹션 */}
                     <div className={styles.header__bottom}>
                         <div className="flex items-center gap-5">
-                            <LabelDatePicker label={"From"} />
-                            <LabelDatePicker label={"To"} />
+                            <LabelDatePicker label={"From"} onSetDate={setStartDate} />
+                            <LabelDatePicker label={"To"} onSetDate={setEndDate} />
                         </div>
                         <Button
                             className="text-white bg-[#E79057] hover:bg-[#E26F24] hover:ring-1 hover:ring-[#E26F24] hover:ring-offset-1 active:bg-[#D5753D] hover:shadow-lg"
-                            onClick={createBoard}
+                            onClick={handleCreateBoard}
                         >
                             Add New Board
                         </Button>
@@ -202,7 +209,7 @@ function BoardPage() {
                             <small className="text-sm font-medium leading-none text-[#6D6D6D] mt-3 mb-7">
                                 Click the button and start flashing!
                             </small>
-                            <button onClick={createBoard}>
+                            <button onClick={handleCreateBoard}>
                                 <Image src="/assets/images/button.svg" width={74} height={74} alt="rounded-button" />
                             </button>
                         </div>
@@ -210,7 +217,7 @@ function BoardPage() {
                         <div className={styles.body__isData}>
                             {/* Add New Board 버튼 클릭으로 인한 Board 데이터가 있을 경우 */}
                             {task?.boards.map((board: BoardContent) => {
-                                return <CardBoard key={board.boardId} />;
+                                return <CardBoard key={board.boardId} data={board} onBoards={setTask} />;
                             })}
                         </div>
                     )}
