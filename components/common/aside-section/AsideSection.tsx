@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useGetTasks, useCreateTask } from "@/hooks/api";
+import { useGetTasks, useCreateTask, useSearch } from "@/hooks/api";
 /** UI 컴포넌트 */
 import { Button, SearchBar } from "@/components/ui";
 import { Task } from "@/types";
@@ -11,18 +11,26 @@ function AsideSection() {
     const { id } = useParams();
     const router = useRouter();
     const { tasks, getTasks } = useGetTasks();
-
-    /** Add New Page 버튼을 클릭하였을 때, TASK 생성 */
-    const handleCreateTask = useCreateTask();
+    const { search } = useSearch();
+    const [searchTerm, setSearchTerm] = useState<string>("");
 
     useEffect(() => {
         getTasks();
     }, [id]);
 
+    /** Add New Page 버튼을 클릭하였을 때, TASK 생성 */
+    const handleCreateTask = useCreateTask();
+
+    /** 검색 */
+    const handleSearch = async (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Enter") search(searchTerm);
+        else return;
+    };
+
     return (
         <aside className="page__aside">
             {/* 검색창 UI */}
-            <SearchBar placeholder="검색어를 입력하세요." />
+            <SearchBar placeholder="검색어를 입력하세요." onChange={(event) => setSearchTerm(event.target.value)} onKeyDown={handleSearch} />
             {/* Add New Page 버튼 UI */}
             <Button className="text-[#E79057] bg-white border border-[#E79057] hover:bg-[#FFF9F5]" onClick={handleCreateTask}>
                 Add New Page
