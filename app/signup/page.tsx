@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 /** UI 컴포넌트 */
 import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input, Label } from "@/components/ui";
 import { Eye, EyeOff } from "@/public/assets/icons";
 
-function LoginPage() {
+function SignUpPage() {
     const supabase = createClient();
     const router = useRouter();
     /** 회원가입에 필요한 상태 값 */
@@ -19,19 +19,19 @@ function LoginPage() {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const togglePassword = () => setShowPassword((prevState) => !prevState);
 
-    const signInWithEmail = async () => {
+    const signUpNewUser = async () => {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await supabase.auth.signUp({
                 email: email,
                 password: password,
             });
 
             if (data) {
                 toast({
-                    title: "로그인을 성공하였습니다.",
-                    description: "자유롭게 TASK 관리를 해주세요!",
+                    title: "회원가입을 성공하였습니다.",
+                    description: "로그인 페이지로 이동하여 로그인을 진행해주세요.",
                 });
-                router.push("/board"); // 로그인 페이지로 이동
+                router.push("/"); // 로그인 페이지로 이동
             }
 
             if (error) {
@@ -67,23 +67,22 @@ function LoginPage() {
                 </div>
                 <Card className="w-[400px]">
                     <CardHeader className="space-y-1">
-                        <CardTitle className="text-2xl">로그인</CardTitle>
-                        <CardDescription>로그인을 위한 정보를 입력해주세요.</CardDescription>
+                        <CardTitle className="text-2xl">회원가입</CardTitle>
+                        <CardDescription>계정을 생성하기 위해 아래 정보를 입력해주세요.</CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-6">
+                        {/* <div className="grid gap-2">
+                            <Label htmlFor="email">휴대폰 번호</Label>
+                            <Input id="phone_number" placeholder="휴대폰 번호를 입력하세요." required />
+                        </div> */}
                         <div className="grid gap-2">
                             <Label htmlFor="email">이메일</Label>
                             <Input id="email" type="email" placeholder="이메일을 입력하세요." required value={email} onChange={(event) => setEmail(event.target.value)} />
                         </div>
                         <div className="relative grid gap-2">
-                            <div className="flex items-center">
-                                <Label htmlFor="password">비밀번호</Label>
-                                <Link href={"#"} className="ml-auto inline-block text-sm underline">
-                                    비밀번호를 잊으셨나요?
-                                </Link>
-                            </div>
+                            <Label htmlFor="password">비밀번호</Label>
                             <Input id="password" type={showPassword ? "text" : "password"} placeholder="비밀번호를 입력하세요." required value={password} onChange={(event) => setPassword(event.target.value)} />
-                            <Button size={"icon"} className="absolute top-[38px] right-2 -translate-y-1/4 bg-transparent hover:bg-transparent" onClick={togglePassword}>
+                            <Button size={"icon"} className="absolute top-8 right-2 -translate-y-1/4 bg-transparent hover:bg-transparent" onClick={togglePassword}>
                                 {showPassword ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
                             </Button>
                         </div>
@@ -93,17 +92,22 @@ function LoginPage() {
                             <span className="w-full border-t"></span>
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                            <span className="bg-background px-2 text-muted-foreground">간편 회원가입을 원하시면 이전 버튼을 누르세요.</span>
                         </div>
                     </div>
-                    <CardFooter className="flex flex-col mt-6">
-                        <Button className="w-full text-white bg-[#E79057] hover:bg-[#E26F24] hover:ring-1 hover:ring-[#E26F24] hover:ring-offset-1 active:bg-[#D5753D] hover:shadow-lg" onClick={signInWithEmail}>
-                            로그인
-                        </Button>
-                        <div className="mt-4 text-center text-sm">
-                            계정이 없으신가요?
-                            <Link href={"/signup"} className="underline text-sm ml-1">
+                    <CardFooter className="w-full flex flex-col mt-6">
+                        <div className="w-full flex items-center gap-4">
+                            <Button variant={"outline"} className="w-full" onClick={() => router.push("/")}>
+                                이전
+                            </Button>
+                            <Button className="w-full text-white bg-[#E79057] hover:bg-[#E26F24] hover:ring-1 hover:ring-[#E26F24] hover:ring-offset-1 active:bg-[#D5753D] hover:shadow-lg" onClick={signUpNewUser}>
                                 회원가입
+                            </Button>
+                        </div>
+                        <div className="mt-4 text-center text-sm">
+                            이미 계정이 있으신가요?{" "}
+                            <Link href={"/"} className="underline text-sm ml-1">
+                                로그인
                             </Link>
                         </div>
                     </CardFooter>
@@ -113,4 +117,4 @@ function LoginPage() {
     );
 }
 
-export default LoginPage;
+export default SignUpPage;
