@@ -7,12 +7,16 @@ import { useGetTasks, useCreateTask, useSearch } from "@/hooks/api";
 import { Button, SearchBar } from "@/components/ui";
 import { Task } from "@/types";
 import { NavUser } from "./NavUser";
+import { useAtomValue } from "jotai";
+import { userAtom } from "@/stores/atoms";
 
 function AsideSection() {
     const router = useRouter();
     const { id } = useParams();
     const { tasks, getTasks } = useGetTasks();
     const { search } = useSearch();
+    /** 상태 값 */
+    const user = useAtomValue(userAtom); // read
     const [searchTerm, setSearchTerm] = useState<string>("");
 
     useEffect(() => {
@@ -28,15 +32,9 @@ function AsideSection() {
         else return;
     };
 
-    const userData = {
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    };
-
     return (
         <aside className="page__aside">
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full gap-3">
                 {/* 검색창 UI */}
                 <SearchBar placeholder="검색어를 입력하세요." onChange={(event) => setSearchTerm(event.target.value)} onKeyDown={handleSearch} />
                 {/* Add New Page 버튼 UI */}
@@ -45,7 +43,9 @@ function AsideSection() {
                 </Button>
                 {/* TODO 목록 UI 하나 */}
                 <div className="flex flex-col mt-4 gap-2">
-                    <small className="text-sm font-medium leading-none text-[#A6A6A6]">9Diin의 TODO-BOARD</small>
+                    <small className="text-sm font-medium leading-none text-[#A6A6A6]">
+                        <span className="text-neutral-700">{user?.nickname ? user?.nickname : "알 수 없음님"}</span>의 TODO-BOARD
+                    </small>
                     <ul className="flex flex-col">
                         {tasks.length === 0 ? (
                             <li className="bg-[#F5F5F5] min-h-9 flex items-center gap-2 py-2 px-[10px] rounded-sm text-sm text-neutral-400">
@@ -55,9 +55,17 @@ function AsideSection() {
                         ) : (
                             tasks.map((task: Task) => {
                                 return (
-                                    <li key={task.id} onClick={() => router.push(`/board/${task.id}`)} className={`${task.id === Number(id) && "bg-[#F5F5F5]"} min-h-9 flex items-center gap-2 py-2 px-[10px] rounded-sm text-sm cursor-pointer`}>
+                                    <li
+                                        key={task.id}
+                                        onClick={() => router.push(`/board/${task.id}`)}
+                                        className={`${
+                                            task.id === Number(id) && "bg-[#F5F5F5]"
+                                        } min-h-9 flex items-center gap-2 py-2 px-[10px] rounded-sm text-sm cursor-pointer`}
+                                    >
                                         <div className={`${task.id === Number(id) ? "bg-[#00F38D]" : "bg-neutral-400"} h-[6px] w-[6px] rounded-full`}></div>
-                                        <span className={`${task.id !== Number(id) && `text-neutral-400`}`}>{task.title ? task.title : "등록된 제목이 없습니다."}</span>
+                                        <span className={`${task.id !== Number(id) && `text-neutral-400`}`}>
+                                            {task.title ? task.title : "등록된 제목이 없습니다."}
+                                        </span>
                                     </li>
                                 );
                             })
@@ -65,7 +73,7 @@ function AsideSection() {
                     </ul>
                 </div>
             </div>
-            <NavUser user={userData} />
+            <NavUser user={user} />
         </aside>
     );
 }
