@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import useEmailCheck from "@/hooks/use-email";
 /** UI 컴포넌트 */
@@ -11,7 +11,6 @@ import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, Car
 import { Eye, EyeOff } from "@/public/assets/icons";
 
 function SignUpPage() {
-    const supabase = createClient();
     const router = useRouter();
     const { checkEmail } = useEmailCheck();
     /** 회원가입에 필요한 상태 값 */
@@ -87,7 +86,7 @@ function SignUpPage() {
                     <h4 className="text-lg font-semibold">안녕하세요 👋🏻</h4>
                     <div className="flex flex-col items-center justify-center mt-2 mb-4">
                         <div className="text-sm text-muted-foreground">
-                            <small className="text-sm text-[#e79057] font-medium leading-none">TASK 관리 앱</small>에 방문해주셔서 감사합니다.
+                            <small className="text-sm text-[#e79057] font-medium leading-none">Seong Yun의 TASK 관리 앱</small>에 방문해주셔서 감사합니다.
                         </div>
                         <p className="text-sm text-muted-foreground">서비스를 이용하려면 로그인을 진행해주세요.</p>
                     </div>
@@ -104,12 +103,30 @@ function SignUpPage() {
                         </div> */}
                         <div className="grid gap-2">
                             <Label htmlFor="email">이메일</Label>
-                            <Input id="email" type="email" placeholder="이메일을 입력하세요." required value={email} onChange={(event) => setEmail(event.target.value)} />
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="이메일을 입력하세요."
+                                required
+                                value={email}
+                                onChange={(event) => setEmail(event.target.value)}
+                            />
                         </div>
                         <div className="relative grid gap-2">
                             <Label htmlFor="password">비밀번호</Label>
-                            <Input id="password" type={showPassword ? "text" : "password"} placeholder="비밀번호를 입력하세요." required value={password} onChange={(event) => setPassword(event.target.value)} />
-                            <Button size={"icon"} className="absolute top-8 right-2 -translate-y-1/4 bg-transparent hover:bg-transparent" onClick={togglePassword}>
+                            <Input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                placeholder="비밀번호를 입력하세요."
+                                required
+                                value={password}
+                                onChange={(event) => setPassword(event.target.value)}
+                            />
+                            <Button
+                                size={"icon"}
+                                className="absolute top-8 right-2 -translate-y-1/4 bg-transparent hover:bg-transparent"
+                                onClick={togglePassword}
+                            >
                                 {showPassword ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
                             </Button>
                         </div>
@@ -127,7 +144,10 @@ function SignUpPage() {
                             <Button variant={"outline"} className="w-full" onClick={() => router.push("/")}>
                                 이전
                             </Button>
-                            <Button className="w-full text-white bg-[#E79057] hover:bg-[#E26F24] hover:ring-1 hover:ring-[#E26F24] hover:ring-offset-1 active:bg-[#D5753D] hover:shadow-lg" onClick={signUpNewUser}>
+                            <Button
+                                className="w-full text-white bg-[#E79057] hover:bg-[#E26F24] hover:ring-1 hover:ring-[#E26F24] hover:ring-offset-1 active:bg-[#D5753D] hover:shadow-lg"
+                                onClick={signUpNewUser}
+                            >
                                 회원가입
                             </Button>
                         </div>

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase/client";
 import { useAtom, useAtomValue } from "jotai";
 import { tasksAtom, userAtom } from "@/stores/atoms";
 

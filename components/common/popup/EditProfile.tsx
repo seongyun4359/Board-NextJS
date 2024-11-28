@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { userAtom } from "@/stores/atoms";
 import { useAtom } from "jotai";
-import { createClient } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabase/client";
 import { toast } from "@/hooks/use-toast";
 /** UI 컴포넌트 */
 import {
@@ -16,6 +16,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
+    Button,
     Label,
     Input,
 } from "@/components/ui";
@@ -26,7 +27,6 @@ interface Props {
 
 function EditProfilePopup({ children }: Props) {
     const [user, setUser] = useAtom(userAtom);
-    const supabase = createClient();
     const [nickname, setNickname] = useState<string>("");
     const [phoneNumber, setPhoneNumber] = useState<string>("");
     const handlePhoneNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,11 +127,14 @@ function EditProfilePopup({ children }: Props) {
                         onChange={handlePhoneNumberChange}
                     />
                 </div>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>취소</AlertDialogCancel>
-                    <AlertDialogAction className="bg-[#E79057] hover:bg-[#E79057]" onClick={updateUserInfo}>
-                        저장
-                    </AlertDialogAction>
+                <AlertDialogFooter className="flex-1 items-center justify-between">
+                    <Button className="bg-red-600 hover:bg-red-600">회원탈퇴</Button>
+                    <div className="flex items-center gap-2 w-full justify-end">
+                        <AlertDialogCancel>취소</AlertDialogCancel>
+                        <AlertDialogAction className="bg-[#E79057] hover:bg-[#E79057]" onClick={updateUserInfo}>
+                            저장
+                        </AlertDialogAction>
+                    </div>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
